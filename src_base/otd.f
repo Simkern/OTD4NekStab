@@ -621,6 +621,8 @@
         if (nid.eq.0) then
           write(6,100,ADVANCE='NO') istep, time, 'Lr | Re '
           write(6,fmtr) (EIGR(i), i=1,npert)
+          write(6,100,ADVANCE='NO') istep, time, 'Lr | Im '
+          write(6,fmtr) (EIGI(i), i=1,npert)
           ! print order for reference
           write(fmti,'("(", I0, "(I4,1X))")') npert
           write(6,100,ADVANCE='NO') istep, time, 's-idx   '
