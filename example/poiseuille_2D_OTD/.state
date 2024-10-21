@@ -1,0 +1,9 @@
+NEK_SOURCE_ROOT=/home/skern/src/GC_Nek5000_v19
+FC=mpifort
+FFLAGS=-I./inc_src -g
+FCPP=-cpp
+FR8=-fdefault-real-8 -fdefault-double-8
+FF77=-std=legacy
+CC=mpicc
+CFLAGS=-I./inc_src
+PPLIST= MPI UNDERSCORE GLOBAL_LONG_LONG TIMER
