@@ -31,4 +31,17 @@
 *.out
 *.app
 
+# Nek5000
+example/*/*/*old
+example/*/*old
+example/*/*/*bkp
+example/*/*bkp
+example/*/.state
+example/*/build.log
+example/*/nek5000
+example/*/run
+example/*/obj
+example/*/makefile
+
+# Misc
 *~

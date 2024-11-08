@@ -7,18 +7,18 @@
       parameter(otd_name='OTD')
 !
 !     timer ids
-      integer otd_tmr_tot_id    ! total time
-      integer otd_tmr_ini_id    ! initialisation time
-      integer otd_tmr_GS_id     ! orthonormalisation time
-      integer otd_tmr_gen_id    ! LU & forcing computation time
-      integer otd_tmr_get_id    ! OTD mode computation time
-      integer otd_tmr_FTLE_id   ! FTLE computation time
-      integer otd_tmr_IO_id     ! IO time
+      integer otd_ttot_id    ! total time
+      integer otd_tini_id    ! initialisation time
+      integer otd_tGS_id     ! orthonormalisation time
+      integer otd_tgen_id    ! LU & forcing computation time
+      integer otd_tget_id    ! OTD mode computation time
+      integer otd_tFTLE_id   ! FTLE computation time
+      integer otd_tIO_id     ! IO time
 
-      common /otd_tmr_id/ otd_tmr_tot_id,    otd_tmr_ini_id
-     $ ,                  otd_tmr_GS_id  
-     $ ,                  otd_tmr_gen_id,    otd_tmr_get_id
-     $ ,                  otd_tmr_FTLE_id,   otd_tmr_IO_id
+      common /otd_tmr_id/ otd_ttot_id,    otd_tini_id
+     $ ,                  otd_tGS_id  
+     $ ,                  otd_tgen_id,    otd_tget_id
+     $ ,                  otd_tFTLE_id,   otd_tIO_id
 
 !     initialisation flag
       logical otd_ifinit
@@ -30,11 +30,13 @@
 !
 !     runtime parameter section
 ! IDs
-      integer otd_nusric_id, otd_iostep_id, otd_prntsp_id, otd_gsstep_id
-     $ ,      otd_FTLEpd_id, otd_ifFTLE_id, otd_ifvlog_id, otd_debug_id
+      integer otd_nusric_id, otd_iostep_id, otd_rststp_id, otd_prntsp_id
+     $ ,      otd_gsstep_id, otd_FTLEpd_id, otd_ifFTLE_id, otd_ifvlog_id
+     $ ,      otd_debug_id
 !
       common /otd_rpmr_id/ otd_nusric_id
      $ ,                   otd_iostep_id
+     $ ,                   otd_rststp_id
      $ ,                   otd_prntsp_id
      $ ,                   otd_gsstep_id
      $ ,                   otd_FTLEpd_id
@@ -47,6 +49,7 @@
                              !  Perturbation IC field i must be named
                              !     OTDIC_%02i.fld
       integer otd_iostep     ! IO frequency for OTD module (fields)
+      integer otd_rststp     ! IO frequency for OTD basis (restart)
       integer otd_prntsp     ! Print frequency for OTD module (Lr)
       integer otd_gsstep     ! Frequency for GS orthonormalization
       real    otd_FTLEpd     ! Time horizon for FTLE computation
@@ -56,6 +59,7 @@
 !    
       common /otd_rprmi/ otd_nusric
      $ ,                 otd_iostep
+     $ ,                 otd_rststp
      $ ,                 otd_prntsp
      $ ,                 otd_gsstep
       common /otd_rprml/ otd_ifFTLE
@@ -71,6 +75,11 @@
 !
       common /OTD_start/ startOTD
       common /OTD_time/  OTDrsttime
+!
+! override gsstep
+      logical gsstep_override
+!
+      common /OTD_log/   gsstep_override     
 !
 ! perturbation ICs
       real vxpic(lx1*ly1*lz1*lelv,lpert)
@@ -109,8 +118,9 @@
      $ ,   Luz (lx1*ly1*lz1*lelv,lpert)         ! z direction
      $ ,   Lr  (lpert,lpert)                    ! reduced operator
      $ ,   Lsym(lpert,lpert)                    ! symmetrized reduced operator
+      integer idx(lpert)                        ! mode indices
 !
-      common /OTD_Lu/ Lux,Luy,Luz,Lr,Lsym
+      common /OTD_Lu/ Lux,Luy,Luz,Lr,Lsym,idx
 !
 ! Additional forcing for the OTD equations
       real OTDfx (lx1*ly1*lz1*lelv,lpert)       ! x direction
@@ -130,13 +140,19 @@
       common /OTD_modes/ OTDmrx,OTDmry,OTDmrz
      $ ,                 OTDmix,OTDmiy,OTDmiz
 !
+! Internal rotation of the OTD subspace
+      real phi_rot(lpert,lpert)
+!
+      common /OTD_phirot/ phi_rot
+!
 ! FTLEs
       real FTLEv(lpert)                         ! FTLE vector
+      real trapz(lpert)                         ! time integral
       real phi(lpert,lpert)                     ! Fundamental solution matrix
       real period
       integer pcount                            ! count number of periods
 !
-      common /OTD_FTLEr/ FTLEv, Phi
+      common /OTD_FTLEr/ FTLEv, trapz, Phi
       common /OTD_FTLEi/ pcount
 !      
 ! LAPACK section
